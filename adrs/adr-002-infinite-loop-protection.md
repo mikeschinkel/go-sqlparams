@@ -365,6 +365,10 @@ go test -fuzz=FuzzParseSQLWithSQLServerFormat -fuzztime=30s
 
 **Crash artifacts**: Discovered failures are automatically saved to `testdata/fuzz/FuzzParseSQL/` for regression testing.
 
+## Updates
+
+**2025-11-26**: Fixed `Identifiers()` and `DottedSelectors()` methods in `identifiers.go` to use `append` instead of direct indexing, eliminating sparse arrays that caused parameter extraction failures.
+
 ## Future Work
 
 1. **Performance benchmarks**: Ensure hang detection doesn't slow normal parsing

@@ -32,23 +32,23 @@ func NewParameter(name Selector, index int) Parameter {
 // Identifiers extracts slice of Identifier from a Parameters value (a
 // slice of []Parameter)
 func (ps Parameters) Identifiers() (ids []Identifier) {
-	ids = make([]Identifier, len(ps))
-	for i, p := range ps {
+	ids = make([]Identifier, 0, len(ps))
+	for _, p := range ps {
 		if !p.IsIdentifier() {
 			continue
 		}
-		ids[i] = Identifier(p.Name)
+		ids = append(ids, Identifier(p.Name))
 	}
 	return ids
 }
 
 func (ps Parameters) DottedSelectors() (selectors []Selector) {
 	selectors = make([]Selector, 0, len(ps))
-	for i, p := range ps {
+	for _, p := range ps {
 		if p.IsIdentifier() {
 			continue
 		}
-		selectors[i] = Selector(p.Name)
+		selectors = append(selectors, Selector(p.Name))
 	}
 	return selectors
 }
