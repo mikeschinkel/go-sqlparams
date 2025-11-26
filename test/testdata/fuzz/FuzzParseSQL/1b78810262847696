@@ -1,0 +1,2 @@
+go test fuzz v1
+string("$d\x00+Ϋ6C6C<00")

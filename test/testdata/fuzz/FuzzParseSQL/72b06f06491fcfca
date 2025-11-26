@@ -1,0 +1,2 @@
+go test fuzz v1
+string("$mL\x00\x00\x00000\x7f\xff0\x7f\x810")

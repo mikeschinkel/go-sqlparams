@@ -1,0 +1,2 @@
+go test fuzz v1
+string(":A \x7f\xff\xff\xffA :A VVVVVVV:A")

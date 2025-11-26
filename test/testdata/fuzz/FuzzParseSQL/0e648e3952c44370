@@ -1,0 +1,2 @@
+go test fuzz v1
+string(":A])k\x91\f\xa110:A1:A:A21B2:B1:B0:b:B:\xff\xff\x00\x00Y:Z:a")

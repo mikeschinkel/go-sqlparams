@@ -1,0 +1,2 @@
+go test fuzz v1
+string("SELECT t.id, IFNULL(u.email,'') AS email FROM tasks t LEFT JOIN users u ON u.id = t.assignee_id WHERE (LOWER(t.title) LIKE LWWER('%' || :q || '%'))")

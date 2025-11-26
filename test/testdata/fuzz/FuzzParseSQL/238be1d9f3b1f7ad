@@ -1,0 +1,2 @@
+go test fuzz v1
+string("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\x86\xbd9\xf8qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq0")

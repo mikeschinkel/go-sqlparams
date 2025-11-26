@@ -1,0 +1,2 @@
+go test fuzz v1
+string("SeELECT '12:30:0'0 as time")

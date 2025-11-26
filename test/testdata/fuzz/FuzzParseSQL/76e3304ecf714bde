@@ -1,0 +1,2 @@
+go test fuzz v1
+string(":A1:BB:A:BC:x:Y1:BB\xe8\x03:BC:X:Y;")

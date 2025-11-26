@@ -1,0 +1,2 @@
+go test fuzz v1
+string("SELECT\xa0\xa0\xa0\xa0\x80\n\n\n\nFROM users WHERE id \xad\x14:id")

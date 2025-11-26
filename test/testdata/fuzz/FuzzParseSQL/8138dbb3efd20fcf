@@ -1,0 +1,2 @@
+go test fuzz v1
+string("#\x7fc\rD\xbf\xc4_oiment\nFELECT :id")

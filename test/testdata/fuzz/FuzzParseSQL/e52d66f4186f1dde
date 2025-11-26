@@ -1,0 +1,2 @@
+go test fuzz v1
+string(">\xb8\xbc>q>\xb8\xbc>\xe49x")

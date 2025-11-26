@@ -1,0 +1,2 @@
+go test fuzz v1
+string(":A0:A1:A2:A:B2:B1:B0\xff\xff7:A00:B:B:B:B:B:B:B:B:B:B:B:B:B:A8TB:B:B:B:B:B:B:B:B:\x01\x00B:B:B:B:B:B:A8:A8:B:B:B:B:B:B:B:B:B:B:B:B:B:B:A8:B:B:B:B:B:B:B:B:B:B:B:B:B:B:B:B:B")

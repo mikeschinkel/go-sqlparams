@@ -1,0 +1,2 @@
+go test fuzz v1
+string("0\xff.na\xdd\xdd\xdd\xdd\xdd\x7fe")

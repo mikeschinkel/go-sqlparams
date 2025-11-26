@@ -1,0 +1,2 @@
+go test fuzz v1
+string(":AN[][[[][[[\xa2\xa2\xa2[[[[[ ")
