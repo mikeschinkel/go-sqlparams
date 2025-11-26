@@ -1,0 +1,2 @@
+go test fuzz v1
+string("$ $ $ $ $ 8\xa6\xde\x05\x99=\x97\xea$ $ \xff $ $ $ $ $ $ $ $ $ $ $ $ $  $ $  4 $ $ $ $ $ $ $ ")

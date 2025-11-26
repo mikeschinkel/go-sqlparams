@@ -1,0 +1,2 @@
+go test fuzz v1
+string(":A:A:A:A.AA.A\xffA:5A\xe1E\xe2\xd4\xe1:A.")
