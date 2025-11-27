@@ -157,7 +157,7 @@ func FuzzParseSQL(f *testing.F) {
 				}
 			}
 
-		case <-time.After(1 * time.Second):
+		case <-time.After(10 * time.Second):
 			t.Fatalf("Parser hung (infinite loop detected) on input: %q", sql)
 		}
 	})

@@ -1,0 +1,2 @@
+go test fuzz v1
+string("# mmc\xffent\nSE\x7f\xffCT :id")

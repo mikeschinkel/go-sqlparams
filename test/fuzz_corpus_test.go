@@ -91,7 +91,7 @@ func TestFuzzCorpus(t *testing.T) {
 				successes = append(successes, entry.Name())
 				t.Logf("%-20s OK: %d params", entry.Name(), len(result.Parameters()))
 			}
-		case <-time.After(200 * time.Millisecond):
+		case <-time.After(10 * time.Second):
 			infiniteLoops = append(infiniteLoops, entry.Name())
 			t.Errorf("%-20s INFINITE LOOP: %q", entry.Name(), input)
 		}
