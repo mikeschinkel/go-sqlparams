@@ -135,7 +135,7 @@ func FuzzParseSQL(f *testing.F) {
 
 			if err != nil {
 				// Error is acceptable - just verify it's a known error type
-				t.Logf("Parse error (acceptable): %v", err)
+				// t.Logf("Parse error (acceptable): %v", err)
 				return
 			}
 

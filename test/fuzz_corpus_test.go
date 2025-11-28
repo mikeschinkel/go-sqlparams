@@ -36,7 +36,7 @@ func TestFuzzCorpus(t *testing.T) {
 		path := filepath.Join(corpusDir, entry.Name())
 		f, err := os.Open(path)
 		if err != nil {
-			t.Logf("Failed to open %s: %v", entry.Name(), err)
+			// t.Logf("Failed to open %s: %v", entry.Name(), err)
 			continue
 		}
 
@@ -51,7 +51,7 @@ func TestFuzzCorpus(t *testing.T) {
 					strLiteral := line[7 : len(line)-1] // Remove "string(" and ")"
 					unquoted, err := strconv.Unquote(strLiteral)
 					if err != nil {
-						t.Logf("Error unquoting %s: %v", entry.Name(), err)
+						// t.Logf("Error unquoting %s: %v", entry.Name(), err)
 						break
 					}
 					input = unquoted
@@ -89,10 +89,10 @@ func TestFuzzCorpus(t *testing.T) {
 			// Parse completed
 			if parseErr != nil {
 				parseErrors = append(parseErrors, entry.Name())
-				t.Logf("%-20s ERROR: %v", entry.Name(), parseErr)
+				// t.Logf("%-20s ERROR: %v", entry.Name(), parseErr)
 			} else {
 				successes = append(successes, entry.Name())
-				t.Logf("%-20s OK: %d params", entry.Name(), len(result.Parameters()))
+				// t.Logf("%-20s OK: %d params", entry.Name(), len(result.Parameters()))
 			}
 		case <-time.After(10 * time.Second):
 			infiniteLoops = append(infiniteLoops, entry.Name())
@@ -101,16 +101,16 @@ func TestFuzzCorpus(t *testing.T) {
 	}
 
 	// Summary
-	t.Logf("\n=== SUMMARY ===")
-	t.Logf("Total files: %d", len(entries))
-	t.Logf("Infinite loops: %d", len(infiniteLoops))
-	t.Logf("Parse errors: %d", len(parseErrors))
-	t.Logf("Successes: %d", len(successes))
+	// t.Logf("\n=== SUMMARY ===")
+	// t.Logf("Total files: %d", len(entries))
+	// t.Logf("Infinite loops: %d", len(infiniteLoops))
+	// t.Logf("Parse errors: %d", len(parseErrors))
+	// t.Logf("Successes: %d", len(successes))
 
 	if len(infiniteLoops) > 0 {
-		t.Logf("\nFiles causing infinite loops:")
+		// t.Logf("\nFiles causing infinite loops:")
 		for _, name := range infiniteLoops {
-			t.Logf("  - %s", name)
+			// t.Logf("  - %s", name)
 		}
 		t.Fatalf("Found %d infinite loop(s)", len(infiniteLoops))
 	}

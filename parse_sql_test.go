@@ -405,11 +405,11 @@ func TestParseSQL_NoInfiniteLoops(t *testing.T) {
 			case <-done:
 				// Test completed successfully (error or not)
 				// We don't care about the result, just that it didn't hang
-				if err != nil {
-					t.Logf("Parse returned error (expected for malformed input): %v", err)
-				} else {
-					t.Logf("Parse succeeded: %d parameters found", len(result.Parameters()))
-				}
+				//if err != nil {
+				//	 t.Logf("Parse returned error (expected for malformed input): %v", err)
+				//} else {
+				//	t.Logf("Parse succeeded: %d parameters found", len(result.Parameters()))
+				//}
 			case <-time.After(100 * time.Millisecond):
 				t.Fatal("Parser hung (infinite loop detected) - took longer than 100ms")
 			}
