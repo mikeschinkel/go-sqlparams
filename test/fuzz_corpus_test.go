@@ -59,7 +59,10 @@ func TestFuzzCorpus(t *testing.T) {
 				break
 			}
 		}
-		f.Close()
+		err = f.Close()
+		if err != nil {
+			t.Error(err.Error())
+		}
 
 		if input == "" {
 			continue
