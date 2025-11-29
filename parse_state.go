@@ -162,7 +162,7 @@ func (s *parseState) consumeDollarQuoted() {
 			s.i++
 			break
 		}
-		if !(c == '_' || unicode.IsLetter(rune(c)) || unicode.IsDigit(rune(c))) {
+		if c != '_' && !unicode.IsLetter(rune(c)) && !unicode.IsDigit(rune(c)) {
 			s.i = start + 1
 			goto end
 		}

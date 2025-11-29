@@ -1,0 +1,106 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+env:
+  GO_VERSION: '1.25'
+  GOEXPERIMENT: jsonv2
+
+jobs:
+  # Fast tests that run on every commit/PR
+  test:
+    name: Unit and Corpus Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run unit tests
+        run: GOEXPERIMENT=${{ env.GOEXPERIMENT }} go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Run fuzz corpus regression tests
+        working-directory: test
+        run: GOEXPERIMENT=${{ env.GOEXPERIMENT }} go test -v -run=TestFuzzCorpus
+
+
+  # Note: For extended fuzzing, use the manual workflow or run locally with:
+  #   cd test && ./infinite-fuzz.sh
+
+  # Build examples to ensure they compile
+  build-examples:
+    name: Build Examples
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        example: [basic_routing, rest_api]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-examples-${{ hashFiles('examples/${{ matrix.example }}/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-examples-
+
+      - name: Build example - ${{ matrix.example }}
+        working-directory: examples/${{ matrix.example }}
+        run: |
+          go mod init example || true
+          go mod edit -replace github.com/mikeschinkel/go-pathvars=../..
+          GOEXPERIMENT=${{ env.GOEXPERIMENT }} go mod tidy
+          GOEXPERIMENT=${{ env.GOEXPERIMENT }} go build -v .
+
+  # Lint and static analysis
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+          args: --timeout=5m

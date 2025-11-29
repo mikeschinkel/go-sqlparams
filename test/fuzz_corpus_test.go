@@ -70,7 +70,6 @@ func TestFuzzCorpus(t *testing.T) {
 
 		// Test this input with timeout
 		done := make(chan struct{})
-		var result sqlparams.ParsedSQL
 		var parseErr error
 
 		go func() {
@@ -81,7 +80,7 @@ func TestFuzzCorpus(t *testing.T) {
 				close(done)
 			}()
 
-			result, parseErr = sqlparams.ParseSQL(sqlparams.SQLQuery(input), formatFunc)
+			_, parseErr = sqlparams.ParseSQL(sqlparams.SQLQuery(input), formatFunc)
 		}()
 
 		select {
@@ -109,9 +108,9 @@ func TestFuzzCorpus(t *testing.T) {
 
 	if len(infiniteLoops) > 0 {
 		// t.Logf("\nFiles causing infinite loops:")
-		for _, name := range infiniteLoops {
-			// t.Logf("  - %s", name)
-		}
+		// for _, name := range infiniteLoops {
+		// 	t.Logf("  - %s", name)
+		// }
 		t.Fatalf("Found %d infinite loop(s)", len(infiniteLoops))
 	}
 }

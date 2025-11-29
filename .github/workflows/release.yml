@@ -1,0 +1,165 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v0.1.1)'
+        required: true
+        type: string
+      description:
+        description: 'Release description (optional - provide context about this release)'
+        required: false
+        type: string
+
+env:
+  GO_VERSION: '1.25'
+  GOEXPERIMENT: jsonv2
+
+jobs:
+  # Re-run all tests to ensure current commit is good
+  test:
+    name: Test Before Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run unit tests
+        run: GOEXPERIMENT=${{ env.GOEXPERIMENT }} go test -v -race ./...
+
+      - name: Run fuzz corpus regression tests
+        working-directory: test
+        run: GOEXPERIMENT=${{ env.GOEXPERIMENT }} go test -v -run=TestFuzzCorpus
+
+      - name: Build examples
+        run: |
+          for example in basic_routing rest_api; do
+            cd examples/$example
+            go mod init example || true
+            go mod edit -replace github.com/mikeschinkel/go-pathvars=../..
+            GOEXPERIMENT=${{ env.GOEXPERIMENT }} go mod tidy
+            GOEXPERIMENT=${{ env.GOEXPERIMENT }} go build -v .
+            cd ../..
+          done
+
+  # Only runs if tests pass
+  release:
+    name: Create Release
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history and tags
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Error: Version must match format v0.0.0 or v0.0.0-suffix"
+            echo "Got: $VERSION"
+            exit 1
+          fi
+
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "${{ inputs.version }}" >/dev/null 2>&1; then
+            echo "Error: Tag ${{ inputs.version }} already exists"
+            exit 1
+          fi
+
+      - name: Get previous tag for release notes
+        id: prev_tag
+        run: |
+          # Get the most recent tag before we create the new one
+          PREV_TAG=$(git tag -l --sort=-v:refname | head -n 1)
+          echo "prev_tag=${PREV_TAG}" >> $GITHUB_OUTPUT
+          echo "Previous tag: ${PREV_TAG:-none (first release)}"
+
+      - name: Create Git tag
+        run: |
+          # Get the actual user email from GitHub API
+          USER_EMAIL=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/users/${{ github.actor }} | jq -r '.email // empty')
+
+          # Fall back to noreply email if user hasn't made their email public
+          if [ -z "$USER_EMAIL" ] || [ "$USER_EMAIL" = "null" ]; then
+            USER_EMAIL="${{ github.actor }}@users.noreply.github.com"
+          fi
+
+          git config user.name "${{ github.actor }}"
+          git config user.email "$USER_EMAIL"
+          git tag -a "${{ inputs.version }}" -m "Release ${{ inputs.version }}"
+          git push origin "${{ inputs.version }}"
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Extract project name from first H1 heading in README.md
+          PROJECT_NAME=$(grep -m 1 '^# ' README.md | sed 's/^# //')
+
+          # Fall back to repo name if not found
+          if [ -z "$PROJECT_NAME" ]; then
+            PROJECT_NAME="${{ github.event.repository.name }}"
+          fi
+
+          REPO_URL="https://github.com/${{ github.repository }}"
+
+          # Use the previous tag we captured before creating the new tag
+          PREV_TAG="${{ steps.prev_tag.outputs.prev_tag }}"
+
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "## ${PROJECT_NAME} ${{ inputs.version }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+
+          # Add user-provided description if present
+          if [ -n "${{ inputs.description }}" ]; then
+            echo "${{ inputs.description }}" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+          fi
+
+         
+          echo "### Commits" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          git log ${PREV_TAG}..HEAD --pretty=format:"- [**%h**](${REPO_URL}/commit/%H) - %s (%an, %ar)" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "**Full Changelog**: ${REPO_URL}/compare/${PREV_TAG}...${{ inputs.version }}" >> $GITHUB_OUTPUT
+       
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
