@@ -56,7 +56,7 @@ jobs:
 
     strategy:
       matrix:
-        example: [basic_routing, rest_api]
+        example: [basic_usage]
 
     steps:
       - name: Checkout code
@@ -81,7 +81,7 @@ jobs:
         working-directory: examples/${{ matrix.example }}
         run: |
           go mod init example || true
-          go mod edit -replace github.com/mikeschinkel/go-pathvars=../..
+          go mod edit -replace github.com/mikeschinkel/go-sqlparams=../..
           GOEXPERIMENT=${{ env.GOEXPERIMENT }} go mod tidy
           GOEXPERIMENT=${{ env.GOEXPERIMENT }} go build -v .
 

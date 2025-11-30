@@ -53,10 +53,10 @@ jobs:
 
       - name: Build examples
         run: |
-          for example in basic_routing rest_api; do
+          for example in basic_usage; do
             cd examples/$example
             go mod init example || true
-            go mod edit -replace github.com/mikeschinkel/go-pathvars=../..
+            go mod edit -replace github.com/mikeschinkel/go-sqlparams=../..
             GOEXPERIMENT=${{ env.GOEXPERIMENT }} go mod tidy
             GOEXPERIMENT=${{ env.GOEXPERIMENT }} go build -v .
             cd ../..
