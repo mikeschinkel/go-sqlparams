@@ -20,11 +20,14 @@ help:
 # Go environment
 GO := go
 
+ensure-valid: tidy test lint vet examples
+
 # Run unit tests
 test: test-unit
 
 test-unit:
-	@cd test && $(GO) test -v -race -coverprofile=./coverage.txt -covermode=atomic ./... || exit 1
+	@$(GO) test -v -race -coverprofile=test/coverage.txt -covermode=atomic ./... || exit 1
+	@cd test && $(GO) test -v -race ./... || exit 1
 
 # Run fuzz corpus regression tests
 test-corpus:
